@@ -184,10 +184,11 @@ const AddShopForm = () => {
       });
 
       // Make API call
-      const response = await fetch('http://localhost:5000/api/shops', {
-        method: 'POST',
-        body: submitData
-      });
+     const response = await fetch('https://balram-backend-clean-production.up.railway.app/api/shops', {
+  method: 'POST',
+  body: submitData
+});
+
 
       const responseTime = Date.now() - startTime;
 
