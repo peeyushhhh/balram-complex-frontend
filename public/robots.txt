@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api
+
+# Important pages
+Allow: /shops
+Allow: /add-shop
+
+Sitemap: https://balramcomplex.com/sitemap.xml
