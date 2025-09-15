@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { X, Upload, Plus } from 'lucide-react';
-import telemetry from '../../services/telemetry';
+// import telemetry from '../../services/telemetry'; // TEMPORARILY DISABLED
 
 const AddShopForm = () => {
   const [formData, setFormData] = useState({
@@ -15,7 +15,7 @@ const AddShopForm = () => {
     seoTitle: '',
     seoDescription: '',
     keywords: [],
-    canonicalUrl: '' // ✅ NOW INCLUDED!
+    canonicalUrl: ''
   });
 
   const [images, setImages] = useState([]);
@@ -30,22 +30,22 @@ const AddShopForm = () => {
       [name]: value
     }));
     
-    // Track user input changes
-    telemetry.trackEvent('form_input_change', {
-      field: name,
-      value_length: value.length,
-      form: 'add_shop'
-    });
+    // DISABLED - Track user input changes
+    // telemetry.trackEvent('form_input_change', {
+    //   field: name,
+    //   value_length: value.length,
+    //   form: 'add_shop'
+    // });
   };
 
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
     
-    // Track image upload attempts
-    telemetry.trackEvent('image_upload_attempt', {
-      file_count: files.length,
-      total_size: files.reduce((sum, file) => sum + file.size, 0)
-    });
+    // DISABLED - Track image upload attempts
+    // telemetry.trackEvent('image_upload_attempt', {
+    //   file_count: files.length,
+    //   total_size: files.reduce((sum, file) => sum + file.size, 0)
+    // });
     
     files.forEach(file => {
       const reader = new FileReader();
@@ -57,12 +57,12 @@ const AddShopForm = () => {
           caption: ''
         }]);
         
-        // Track successful image upload
-        telemetry.trackEvent('image_upload_success', {
-          file_name: file.name,
-          file_size: file.size,
-          file_type: file.type
-        });
+        // DISABLED - Track successful image upload
+        // telemetry.trackEvent('image_upload_success', {
+        //   file_name: file.name,
+        //   file_size: file.size,
+        //   file_type: file.type
+        // });
       };
       reader.readAsDataURL(file);
     });
@@ -72,12 +72,12 @@ const AddShopForm = () => {
     const removedImage = images[index];
     setImages(prev => prev.filter((_, i) => i !== index));
     
-    // Track image removal
-    telemetry.trackEvent('image_remove', {
-      index,
-      file_name: removedImage?.file?.name,
-      total_images_remaining: images.length - 1
-    });
+    // DISABLED - Track image removal
+    // telemetry.trackEvent('image_remove', {
+    //   index,
+    //   file_name: removedImage?.file?.name,
+    //   total_images_remaining: images.length - 1
+    // });
   };
 
   const addAmenity = () => {
@@ -88,11 +88,11 @@ const AddShopForm = () => {
         amenities: [...prev.amenities, newAmenity]
       }));
       
-      // Track amenity addition
-      telemetry.trackEvent('amenity_add', {
-        amenity: newAmenity,
-        total_amenities: formData.amenities.length + 1
-      });
+      // DISABLED - Track amenity addition
+      // telemetry.trackEvent('amenity_add', {
+      //   amenity: newAmenity,
+      //   total_amenities: formData.amenities.length + 1
+      // });
       
       setAmenityInput('');
     }
@@ -104,11 +104,11 @@ const AddShopForm = () => {
       amenities: prev.amenities.filter(a => a !== amenity)
     }));
     
-    // Track amenity removal
-    telemetry.trackEvent('amenity_remove', {
-      amenity,
-      remaining_count: formData.amenities.length - 1
-    });
+    // DISABLED - Track amenity removal
+    // telemetry.trackEvent('amenity_remove', {
+    //   amenity,
+    //   remaining_count: formData.amenities.length - 1
+    // });
   };
 
   const addKeyword = () => {
@@ -119,11 +119,11 @@ const AddShopForm = () => {
         keywords: [...prev.keywords, newKeyword]
       }));
       
-      // Track keyword addition
-      telemetry.trackEvent('keyword_add', {
-        keyword: newKeyword,
-        total_keywords: formData.keywords.length + 1
-      });
+      // DISABLED - Track keyword addition
+      // telemetry.trackEvent('keyword_add', {
+      //   keyword: newKeyword,
+      //   total_keywords: formData.keywords.length + 1
+      // });
       
       setKeywordInput('');
     }
@@ -135,11 +135,11 @@ const AddShopForm = () => {
       keywords: prev.keywords.filter(k => k !== keyword)
     }));
     
-    // Track keyword removal
-    telemetry.trackEvent('keyword_remove', {
-      keyword,
-      remaining_count: formData.keywords.length - 1
-    });
+    // DISABLED - Track keyword removal
+    // telemetry.trackEvent('keyword_remove', {
+    //   keyword,
+    //   remaining_count: formData.keywords.length - 1
+    // });
   };
 
   const handleSubmit = async (e) => {
@@ -148,16 +148,16 @@ const AddShopForm = () => {
     
     const startTime = Date.now();
     
-    // Track form submission start
-    telemetry.trackEvent('form_submission_start', {
-      form: 'add_shop',
-      fields_filled: Object.values(formData).filter(value => 
-        Array.isArray(value) ? value.length > 0 : value.trim() !== ''
-      ).length,
-      images_count: images.length,
-      amenities_count: formData.amenities.length,
-      keywords_count: formData.keywords.length
-    });
+    // DISABLED - Track form submission start
+    // telemetry.trackEvent('form_submission_start', {
+    //   form: 'add_shop',
+    //   fields_filled: Object.values(formData).filter(value => 
+    //     Array.isArray(value) ? value.length > 0 : value.trim() !== ''
+    //   ).length,
+    //   images_count: images.length,
+    //   amenities_count: formData.amenities.length,
+    //   keywords_count: formData.keywords.length
+    // });
 
     try {
       // Create FormData for file upload
@@ -184,25 +184,23 @@ const AddShopForm = () => {
       });
 
       // Make API call
-     const response = await fetch('https://balram-backend-clean-production.up.railway.app/api/shops', {
-  method: 'POST',
-  body: submitData
-});
-
+      const response = await fetch('https://balram-backend-clean-production.up.railway.app/api/shops', {
+        method: 'POST',
+        body: submitData
+      });
 
       const responseTime = Date.now() - startTime;
 
       if (response.ok) {
-        // Track successful submission
-        telemetry.trackFormSubmission('add_shop', true);
-        telemetry.trackAPICall('/api/shops', 'POST', responseTime, response.status);
-        
-        telemetry.trackEvent('shop_creation_success', {
-          shop_name: formData.name,
-          category: formData.category,
-          price: formData.price,
-          response_time: responseTime
-        });
+        // DISABLED - Track successful submission
+        // telemetry.trackFormSubmission('add_shop', true);
+        // telemetry.trackAPICall('/api/shops', 'POST', responseTime, response.status);
+        // telemetry.trackEvent('shop_creation_success', {
+        //   shop_name: formData.name,
+        //   category: formData.category,
+        //   price: formData.price,
+        //   response_time: responseTime
+        // });
         
         alert('Shop added successfully!');
         
@@ -226,28 +224,26 @@ const AddShopForm = () => {
         setKeywordInput('');
         
       } else {
-        // Track submission failure
-        telemetry.trackFormSubmission('add_shop', false);
-        telemetry.trackAPICall('/api/shops', 'POST', responseTime, response.status);
-        
-        telemetry.trackEvent('shop_creation_failure', {
-          status_code: response.status,
-          response_time: responseTime
-        });
+        // DISABLED - Track submission failure
+        // telemetry.trackFormSubmission('add_shop', false);
+        // telemetry.trackAPICall('/api/shops', 'POST', responseTime, response.status);
+        // telemetry.trackEvent('shop_creation_failure', {
+        //   status_code: response.status,
+        //   response_time: responseTime
+        // });
         
         alert('Error adding shop. Please try again.');
       }
     } catch (error) {
       const responseTime = Date.now() - startTime;
       
-      // Track submission error
-      telemetry.trackFormSubmission('add_shop', false);
-      telemetry.trackAPICall('/api/shops', 'POST', responseTime, 0);
-      
-      telemetry.trackEvent('shop_creation_error', {
-        error_message: error.message,
-        response_time: responseTime
-      });
+      // DISABLED - Track submission error
+      // telemetry.trackFormSubmission('add_shop', false);
+      // telemetry.trackAPICall('/api/shops', 'POST', responseTime, 0);
+      // telemetry.trackEvent('shop_creation_error', {
+      //   error_message: error.message,
+      //   response_time: responseTime
+      // });
       
       console.error('Error adding shop:', error);
       alert('Error adding shop. Please try again.');
@@ -564,7 +560,6 @@ const AddShopForm = () => {
                 </div>
               </div>
 
-              {/* ✅ CANONICAL URL FIELD - NOW ADDED! */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Canonical URL
@@ -580,7 +575,6 @@ const AddShopForm = () => {
                 />
               </div>
 
-              {/* ✅ SEO Benefits Section - Added Back! */}
               <div className="bg-green-50 p-4 rounded-lg">
                 <div className="flex items-center mb-2">
                   <span className="text-green-600 mr-2">✅</span>

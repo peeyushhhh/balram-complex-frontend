@@ -1,17 +1,18 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import SEOHead from '../components/common/SEOHead';
 import { shopsAPI } from '../services/api';
-import telemetry from '../services/telemetry'; // ← ADD THIS IMPORT
+// import telemetry from '../services/telemetry'; // TEMPORARILY DISABLED
 
 const Shops = () => {
   const [shops, setShops] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchShops();
-    // Track page view
-    telemetry.trackPageView('shops_listing');
+    // DISABLED - Track page view
+    // telemetry.trackPageView('shops_listing');
   }, []);
 
   const fetchShops = async () => {
@@ -21,22 +22,23 @@ const Shops = () => {
       const response = await shopsAPI.getAll();
       const data = response.data || [];
       
-      // Track API performance
-      telemetry.trackAPICall('/api/shops', 'GET', Date.now() - startTime, 200);
+      // DISABLED - Track API performance
+      // telemetry.trackAPICall('/api/shops', 'GET', Date.now() - startTime, 200);
       
       setShops(Array.isArray(data) ? data : []);
     } catch (error) {
-      // Track API error
-      telemetry.trackAPICall('/api/shops', 'GET', Date.now() - startTime, 500);
+      // DISABLED - Track API error
+      // telemetry.trackAPICall('/api/shops', 'GET', Date.now() - startTime, 500);
       console.error('Error fetching shops:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  // Track shop clicks
+  // DISABLED - Track shop clicks
   const handleShopClick = (shop) => {
-    telemetry.trackShopView(shop.id || shop._id, shop.name);
+    // telemetry.trackShopView(shop.id || shop._id, shop.name);
+    navigate(`/shops/${shop.id || shop._id}`);
   };
 
   return (
@@ -72,7 +74,7 @@ const Shops = () => {
               <div 
                 key={shop.id || shop._id} 
                 className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
-                onClick={() => handleShopClick(shop)} // ← ADD THIS TRACKING
+                onClick={() => handleShopClick(shop)}
               >
                 {shop.images && shop.images[0] && (
                   <img 
