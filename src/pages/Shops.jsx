@@ -20,16 +20,38 @@ const Shops = () => {
     
     try {
       const response = await shopsAPI.getAll();
-      const data = response.data || [];
+      const apiResponse = response.data || response || [];
+      
+      // Extract the actual shops array from API response
+      let shopsData = apiResponse.data || apiResponse;
+      
+      // Ensure we have an array
+      if (!Array.isArray(shopsData)) {
+        shopsData = [];
+      }
+      
+      // Filter out incomplete shops (those missing required fields)
+      const completeShops = shopsData.filter(shop => 
+        shop && 
+        shop.name && 
+        shop.name.trim() !== '' &&
+        shop.price !== undefined && 
+        shop.price !== null &&
+        shop.category && 
+        shop.location
+      );
+      
+      console.log(`Filtered shops: ${completeShops.length} complete out of ${shopsData.length} total`);
       
       // DISABLED - Track API performance
       // telemetry.trackAPICall('/api/shops', 'GET', Date.now() - startTime, 200);
       
-      setShops(Array.isArray(data) ? data : []);
+      setShops(completeShops);
     } catch (error) {
       // DISABLED - Track API error
       // telemetry.trackAPICall('/api/shops', 'GET', Date.now() - startTime, 500);
       console.error('Error fetching shops:', error);
+      setShops([]);
     } finally {
       setLoading(false);
     }
@@ -37,8 +59,11 @@ const Shops = () => {
 
   // DISABLED - Track shop clicks
   const handleShopClick = (shop) => {
-    // telemetry.trackShopView(shop.id || shop._id, shop.name);
-    navigate(`/shops/${shop.id || shop._id}`);
+    // Only navigate if shop has required data
+    if (shop && shop.id && shop.name) {
+      // telemetry.trackShopView(shop.id || shop._id, shop.name);
+      navigate(`/shops/${shop.id || shop._id}`);
+    }
   };
 
   return (
@@ -66,7 +91,8 @@ const Shops = () => {
           </div>
         ) : shops.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">No shops found.</p>
+            <p className="text-gray-500 text-lg">No complete shops found.</p>
+            <p className="text-gray-400 text-sm mt-2">Add a new shop to get started!</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -76,23 +102,34 @@ const Shops = () => {
                 className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
                 onClick={() => handleShopClick(shop)}
               >
-                {shop.images && shop.images[0] && (
+                {shop.images && shop.images[0] && shop.images[0].url && (
                   <img 
-                    src={shop.images[0].url || 'https://via.placeholder.com/400x200'} 
-                    alt={shop.images[0].altText || shop.name}
+                    src={shop.images[0].url} 
+                    alt={shop.images[0].altText || shop.name || 'Shop image'}
                     className="w-full h-48 object-cover"
+                    onError={(e) => {
+                      e.target.src = 'https://via.placeholder.com/400x200?text=No+Image';
+                    }}
                   />
                 )}
                 <div className="p-4">
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">{shop.name}</h3>
-                  <p className="text-gray-600 mb-2">{shop.category}</p>
-                  <p className="text-gray-700 text-sm mb-4">{shop.location}</p>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">
+                    {shop.name || 'Unnamed Shop'}
+                  </h3>
+                  <p className="text-gray-600 mb-2">
+                    {shop.category || 'Category not specified'}
+                  </p>
+                  <p className="text-gray-700 text-sm mb-4">
+                    {shop.location || 'Location not specified'}
+                  </p>
                   <div className="flex justify-between items-center">
                     <span className="text-2xl font-bold text-green-600">
-                      ₹{shop.price?.toLocaleString() || 'N/A'}/month
+                      ₹{typeof shop.price === 'number' ? shop.price.toLocaleString() : (shop.price || 'N/A')}/month
                     </span>
                     <span className={`px-2 py-1 rounded text-xs font-semibold ${
-                      shop.status === 'available' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      shop.status === 'available' ? 'bg-green-100 text-green-800' : 
+                      shop.status === 'rented' ? 'bg-red-100 text-red-800' :
+                      'bg-gray-100 text-gray-800'
                     }`}>
                       {shop.status || 'unknown'}
                     </span>
