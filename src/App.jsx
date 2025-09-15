@@ -41,3 +41,4 @@ const App = () => {
 };
 
 export default App;
+// Force rebuild - Sep 15, 2025
