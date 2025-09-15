@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = 'https://balram-backend-clean-production.up.railway.app/api';
 
 export const shopsAPI = {
   getAll: async () => {

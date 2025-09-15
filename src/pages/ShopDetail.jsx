@@ -14,7 +14,7 @@ const ShopDetail = () => {
 
   const fetchShop = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/shops/${id}`);
+      const response = await fetch(`https://balram-backend-clean-production.up.railway.app/api/shops/${id}`);
       const data = await response.json();
       
       if (data.success) {
