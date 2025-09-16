@@ -26,11 +26,11 @@ const Shops = () => {
       
       console.log('Raw shops data:', shopsData);
       
+      // ✅ FIXED - Use correct field names and syntax
       const completeShops = shopsData.filter(shop => 
         shop && 
-        shop.title && 
-        shop.title.trim() !== '' &&
-        shop.propertyType === 'shop'
+        ((shop.name && shop.name.trim() !== '') || (shop.title && shop.title.trim() !== '')) &&
+        (shop.category || shop.propertyType)
       );
       
       console.log(`Filtered shops: ${completeShops.length} complete out of ${shopsData.length} total`);
@@ -46,7 +46,8 @@ const Shops = () => {
   };
 
   const handleShopClick = (shop) => {
-    if (shop && shop._id && shop.title) {
+    // ✅ FIXED - Handle both old and new field names
+    if (shop && shop._id && (shop.name || shop.title)) {
       navigate(`/shops/${shop._id}`);
     }
   };
@@ -90,7 +91,7 @@ const Shops = () => {
                 {shop.images && shop.images[0] && shop.images[0].url && (
                   <img 
                     src={shop.images[0].url} 
-                    alt={shop.images[0].altText || shop.title || 'Shop image'}
+                    alt={shop.images[0].altText || shop.name || shop.title || 'Shop image'}
                     className="w-full h-48 object-cover"
                     onError={(e) => {
                       e.target.src = 'https://via.placeholder.com/400x200?text=No+Image';
@@ -99,17 +100,17 @@ const Shops = () => {
                 )}
                 <div className="p-4">
                   <h3 className="text-xl font-bold text-gray-900 mb-2">
-                    {shop.title || 'Unnamed Shop'}
+                    {shop.name || shop.title || 'Unnamed Shop'}
                   </h3>
                   <p className="text-gray-600 mb-2">
-                    {shop.propertyType || 'Property Type not specified'}
+                    {shop.category || shop.propertyType || 'Category not specified'}
                   </p>
                   <p className="text-gray-700 text-sm mb-4">
                     {shop.description ? shop.description.substring(0, 100) + '...' : 'No description available'}
                   </p>
                   <div className="flex justify-between items-center">
                     <span className="text-lg font-bold text-blue-600">
-                      Contact: {shop.contact?.phone || 'N/A'}
+                      {shop.price ? `₹${shop.price}/month` : (shop.contact?.phone ? `Contact: ${shop.contact.phone}` : 'Contact for details')}
                     </span>
                     <span className={`px-2 py-1 rounded text-xs font-semibold ${
                       shop.status === 'available' ? 'bg-green-100 text-green-800' : 

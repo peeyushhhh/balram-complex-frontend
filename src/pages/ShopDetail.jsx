@@ -49,10 +49,15 @@ const ShopDetail = () => {
     );
   }
 
-  // ✅ FIXED - Use correct field names from API
-  const seoTitle = shop.seoTitle || `${shop.title || shop.name} - Available for Rent at Balram Complex`;
-  const seoDescription = shop.seoDescription || `${shop.description?.substring(0, 150)}. Contact: ${shop.contact?.phone}`;
-  const seoKeywords = shop.keywords ? shop.keywords.join(', ') : `${shop.propertyType || shop.category}, shop for rent, commercial space`;
+  // ✅ FIXED - Handle both old and new field formats
+  const shopName = shop.name || shop.title || 'Unnamed Shop';
+  const shopCategory = shop.category || shop.propertyType || 'Not specified';
+  const shopPrice = shop.price || null;
+  const shopContact = shop.contact?.phone || null;
+  
+  const seoTitle = shop.seoTitle || `${shopName} - Available for Rent at Balram Complex`;
+  const seoDescription = shop.seoDescription || `${shop.description?.substring(0, 150) || 'Commercial space available'}.`;
+  const seoKeywords = shop.keywords ? shop.keywords.join(', ') : `${shopCategory}, shop for rent, commercial space`;
   const shopImageUrl = shop.images && shop.images[0] ? shop.images[0].url : '';
 
   return (
@@ -79,7 +84,7 @@ const ShopDetail = () => {
               <div className="md:w-1/2">
                 <img 
                   src={shop.images[0].url} 
-                  alt={shop.images[0].altText || shop.title}
+                  alt={shop.images[0].altText || shopName}
                   className="w-full h-96 object-cover"
                 />
               </div>
@@ -87,43 +92,62 @@ const ShopDetail = () => {
             
             {/* Shop Info */}
             <div className="md:w-1/2 p-8">
-              {/* ✅ FIXED - Use title field */}
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">{shop.title || shop.name}</h1>
+              {/* ✅ FIXED - Use unified field names */}
+              <h1 className="text-3xl font-bold text-gray-900 mb-4">{shopName}</h1>
               
               <div className="space-y-3 mb-6">
                 <div className="flex items-center">
-                  <span className="text-gray-600 w-24">Type:</span>
-                  <span className="font-medium">{shop.propertyType || shop.category}</span>
+                  <span className="text-gray-600 w-24">Category:</span>
+                  <span className="font-medium">{shopCategory}</span>
                 </div>
                 <div className="flex items-center">
-                  <span className="text-gray-600 w-24">BHK:</span>
-                  <span className="font-medium">{shop.bhk || shop.location || 'N/A'}</span>
+                  <span className="text-gray-600 w-24">Location:</span>
+                  <span className="font-medium">{shop.location || 'Contact for details'}</span>
                 </div>
                 <div className="flex items-center">
                   <span className="text-gray-600 w-24">Area:</span>
                   <span className="font-medium">{shop.area || 'Contact for details'}</span>
                 </div>
-                <div className="flex items-center">
-                  <span className="text-gray-600 w-24">Contact:</span>
-                  <span className="text-2xl font-bold text-green-600">{shop.contact?.phone || shop.price || 'N/A'}</span>
-                </div>
+                
+                {/* ✅ FIXED - Show price OR contact based on what's available */}
+                {shopPrice && (
+                  <div className="flex items-center">
+                    <span className="text-gray-600 w-24">Rent:</span>
+                    <span className="text-2xl font-bold text-green-600">₹{shopPrice}/month</span>
+                  </div>
+                )}
+                
+                {shopContact && (
+                  <div className="flex items-center">
+                    <span className="text-gray-600 w-24">Contact:</span>
+                    <span className="text-xl font-bold text-blue-600">{shopContact}</span>
+                  </div>
+                )}
+                
                 <div className="flex items-center">
                   <span className="text-gray-600 w-24">Status:</span>
                   <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
                     shop.status === 'available' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                   }`}>
-                    {shop.status}
+                    {shop.status || 'available'}
                   </span>
                 </div>
               </div>
 
-              {shop.status === 'available' && (
+              {/* ✅ FIXED - Show appropriate call button */}
+              {shop.status === 'available' && shopContact && (
                 <a 
-                  href={`tel:${shop.contact?.phone}`}
+                  href={`tel:${shopContact}`}
                   className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 font-semibold inline-block text-center"
                 >
-                  Call: {shop.contact?.phone}
+                  Call: {shopContact}
                 </a>
+              )}
+              
+              {shop.status === 'available' && !shopContact && shopPrice && (
+                <div className="w-full bg-gray-100 text-gray-600 py-3 px-6 rounded-lg text-center font-semibold">
+                  Contact for viewing - ₹{shopPrice}/month
+                </div>
               )}
             </div>
           </div>
@@ -134,7 +158,9 @@ const ShopDetail = () => {
           {/* Description */}
           <div className="bg-white p-6 rounded-lg shadow-md">
             <h2 className="text-xl font-semibold mb-4">Description</h2>
-            <p className="text-gray-700 leading-relaxed">{shop.description}</p>
+            <p className="text-gray-700 leading-relaxed">
+              {shop.description || 'No description available.'}
+            </p>
           </div>
 
           {/* Amenities */}
@@ -163,7 +189,7 @@ const ShopDetail = () => {
                 <img 
                   key={index}
                   src={image.url} 
-                  alt={image.altText}
+                  alt={image.altText || `${shopName} image ${index + 2}`}
                   title={image.caption}
                   className="w-full h-48 object-cover rounded-lg"
                 />
