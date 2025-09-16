@@ -49,10 +49,10 @@ const ShopDetail = () => {
     );
   }
 
-  // Generate SEO data from shop data
-  const seoTitle = shop.seoTitle || `${shop.name} - Available for Rent at Balram Complex`;
-  const seoDescription = shop.seoDescription || `${shop.description.substring(0, 150)}. Located at ${shop.location}. ₹${shop.price}/month. Contact for viewing.`;
-  const seoKeywords = shop.keywords ? shop.keywords.join(', ') : `${shop.category}, shop for rent, ${shop.location}, commercial space`;
+  // ✅ FIXED - Use correct field names from API
+  const seoTitle = shop.seoTitle || `${shop.title || shop.name} - Available for Rent at Balram Complex`;
+  const seoDescription = shop.seoDescription || `${shop.description?.substring(0, 150)}. Contact: ${shop.contact?.phone}`;
+  const seoKeywords = shop.keywords ? shop.keywords.join(', ') : `${shop.propertyType || shop.category}, shop for rent, commercial space`;
   const shopImageUrl = shop.images && shop.images[0] ? shop.images[0].url : '';
 
   return (
@@ -60,7 +60,7 @@ const ShopDetail = () => {
       <SEOHead 
         title={seoTitle}
         description={seoDescription}
-        canonicalUrl={shop.canonicalUrl || `https://balramcomplex.com/shops/${shop.slug || shop.id}`}
+        canonicalUrl={shop.canonicalUrl || `https://balramcomplex.com/shops/${shop.slug || shop._id}`}
         keywords={seoKeywords}
         imageUrl={shopImageUrl}
       />
@@ -79,7 +79,7 @@ const ShopDetail = () => {
               <div className="md:w-1/2">
                 <img 
                   src={shop.images[0].url} 
-                  alt={shop.images[0].altText}
+                  alt={shop.images[0].altText || shop.title}
                   className="w-full h-96 object-cover"
                 />
               </div>
@@ -87,24 +87,25 @@ const ShopDetail = () => {
             
             {/* Shop Info */}
             <div className="md:w-1/2 p-8">
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">{shop.name}</h1>
+              {/* ✅ FIXED - Use title field */}
+              <h1 className="text-3xl font-bold text-gray-900 mb-4">{shop.title || shop.name}</h1>
               
               <div className="space-y-3 mb-6">
                 <div className="flex items-center">
-                  <span className="text-gray-600 w-24">Category:</span>
-                  <span className="font-medium">{shop.category}</span>
+                  <span className="text-gray-600 w-24">Type:</span>
+                  <span className="font-medium">{shop.propertyType || shop.category}</span>
                 </div>
                 <div className="flex items-center">
-                  <span className="text-gray-600 w-24">Location:</span>
-                  <span className="font-medium">{shop.location}</span>
+                  <span className="text-gray-600 w-24">BHK:</span>
+                  <span className="font-medium">{shop.bhk || shop.location || 'N/A'}</span>
                 </div>
                 <div className="flex items-center">
                   <span className="text-gray-600 w-24">Area:</span>
-                  <span className="font-medium">{shop.area}</span>
+                  <span className="font-medium">{shop.area || 'Contact for details'}</span>
                 </div>
                 <div className="flex items-center">
-                  <span className="text-gray-600 w-24">Rent:</span>
-                  <span className="text-2xl font-bold text-green-600">₹{shop.price}/month</span>
+                  <span className="text-gray-600 w-24">Contact:</span>
+                  <span className="text-2xl font-bold text-green-600">{shop.contact?.phone || shop.price || 'N/A'}</span>
                 </div>
                 <div className="flex items-center">
                   <span className="text-gray-600 w-24">Status:</span>
@@ -117,9 +118,12 @@ const ShopDetail = () => {
               </div>
 
               {shop.status === 'available' && (
-                <button className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 font-semibold">
-                  Contact for Viewing
-                </button>
+                <a 
+                  href={`tel:${shop.contact?.phone}`}
+                  className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 font-semibold inline-block text-center"
+                >
+                  Call: {shop.contact?.phone}
+                </a>
               )}
             </div>
           </div>
@@ -137,11 +141,15 @@ const ShopDetail = () => {
           <div className="bg-white p-6 rounded-lg shadow-md">
             <h2 className="text-xl font-semibold mb-4">Amenities</h2>
             <div className="flex flex-wrap gap-2">
-              {shop.amenities && shop.amenities.map((amenity, index) => (
-                <span key={index} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
-                  {amenity}
-                </span>
-              ))}
+              {shop.amenities && shop.amenities.length > 0 ? (
+                shop.amenities.map((amenity, index) => (
+                  <span key={index} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
+                    {amenity}
+                  </span>
+                ))
+              ) : (
+                <p className="text-gray-500">No amenities listed</p>
+              )}
             </div>
           </div>
         </div>
