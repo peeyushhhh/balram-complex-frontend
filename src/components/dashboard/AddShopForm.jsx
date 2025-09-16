@@ -102,14 +102,14 @@ const AddShopForm = () => {
 
     try {
       const submitData = {
-        ...formData,
-        contact: { phone: formData.phone }, // Send contact as nested object
-        images: images.map(img => ({
-          url: img.url,
-          altText: img.altText || formData.name,
-          caption: img.caption || `Image of ${formData.name}`
-        }))
-      };
+  ...formData,
+  contact: { phone: formData.phone },
+  images: images.map(img => ({
+    url: img.url,
+    altText: img.altText || formData.name,
+    caption: img.caption || `Image of ${formData.name}`
+  }))
+};
 
       const response = await fetch('https://balram-backend-clean-production.up.railway.app/api/shops', {
         method: 'POST',
