@@ -142,111 +142,55 @@ const AddShopForm = () => {
     // });
   };
 
+  // ✅ MAIN FIX - Updated handleSubmit function
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    const startTime = Date.now();
-    
-    // DISABLED - Track form submission start
-    // telemetry.trackEvent('form_submission_start', {
-    //   form: 'add_shop',
-    //   fields_filled: Object.values(formData).filter(value => 
-    //     Array.isArray(value) ? value.length > 0 : value.trim() !== ''
-    //   ).length,
-    //   images_count: images.length,
-    //   amenities_count: formData.amenities.length,
-    //   keywords_count: formData.keywords.length
-    // });
-
     try {
-      // Create FormData for file upload
-      const submitData = new FormData();
-      
-      // Add form fields
-      Object.keys(formData).forEach(key => {
-        if (Array.isArray(formData[key])) {
-          submitData.append(key, JSON.stringify(formData[key]));
-        } else {
-          submitData.append(key, formData[key]);
-        }
-      });
+      // ✅ FIXED - Send as JSON instead of FormData
+      const submitData = {
+        ...formData,
+        images: images.map(img => ({
+          url: img.url,
+          altText: img.altText || formData.name,
+          caption: img.caption || `Image of ${formData.name}`
+        }))
+      };
 
-      // Add images
-      images.forEach((image, index) => {
-        if (image.file) {
-          submitData.append('images', image.file);
-          submitData.append(`imageData_${index}`, JSON.stringify({
-            altText: image.altText,
-            caption: image.caption
-          }));
-        }
-      });
+      console.log('Submitting data:', submitData);
 
-      // Make API call
       const response = await fetch('https://balram-backend-clean-production.up.railway.app/api/shops', {
         method: 'POST',
-        body: submitData
+        headers: {
+          'Content-Type': 'application/json', // ✅ JSON headers
+        },
+        body: JSON.stringify(submitData) // ✅ JSON body
       });
 
-      const responseTime = Date.now() - startTime;
-
       if (response.ok) {
-        // DISABLED - Track successful submission
-        // telemetry.trackFormSubmission('add_shop', true);
-        // telemetry.trackAPICall('/api/shops', 'POST', responseTime, response.status);
-        // telemetry.trackEvent('shop_creation_success', {
-        //   shop_name: formData.name,
-        //   category: formData.category,
-        //   price: formData.price,
-        //   response_time: responseTime
-        // });
+        const result = await response.json();
+        console.log('Success response:', result);
         
         alert('Shop added successfully!');
         
         // Reset form
         setFormData({
-          name: '',
-          category: '',
-          location: '',
-          area: '',
-          price: '',
-          status: 'available',
-          description: '',
-          amenities: [],
-          seoTitle: '',
-          seoDescription: '',
-          keywords: [],
-          canonicalUrl: ''
+          name: '', category: '', location: '', area: '', price: '',
+          status: 'available', description: '', amenities: [],
+          seoTitle: '', seoDescription: '', keywords: [], canonicalUrl: ''
         });
         setImages([]);
         setAmenityInput('');
         setKeywordInput('');
-        
       } else {
-        // DISABLED - Track submission failure
-        // telemetry.trackFormSubmission('add_shop', false);
-        // telemetry.trackAPICall('/api/shops', 'POST', responseTime, response.status);
-        // telemetry.trackEvent('shop_creation_failure', {
-        //   status_code: response.status,
-        //   response_time: responseTime
-        // });
-        
-        alert('Error adding shop. Please try again.');
+        const errorData = await response.json();
+        console.error('API Error:', errorData);
+        alert(`Error: ${errorData.message || 'Please try again'}`);
       }
     } catch (error) {
-      const responseTime = Date.now() - startTime;
-      
-      // DISABLED - Track submission error
-      // telemetry.trackFormSubmission('add_shop', false);
-      // telemetry.trackAPICall('/api/shops', 'POST', responseTime, 0);
-      // telemetry.trackEvent('shop_creation_error', {
-      //   error_message: error.message,
-      //   response_time: responseTime
-      // });
-      
-      console.error('Error adding shop:', error);
-      alert('Error adding shop. Please try again.');
+      console.error('Network Error:', error);
+      alert('Network error. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
